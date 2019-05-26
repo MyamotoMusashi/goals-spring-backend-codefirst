@@ -1,17 +1,22 @@
 package goals.models;
 
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
 @JsonIgnoreProperties 
 public class Goals {
-	
+		
 	@Id
 	@GeneratedValue
 	@Column(name="id")
@@ -24,7 +29,7 @@ public class Goals {
 	private String description;
 	
 	@Column(name="parentid")
-	private int parentid;
+	private Integer parentid;
 	
 	@Column(name="dueDate")
 	private String dueDate;
@@ -65,6 +70,13 @@ public class Goals {
 	@Column(name="replacement")
 	private String replacement;
 	
+	@Column(name="isDaily")
+	private Boolean isDaily;
+	
+	@OneToMany(mappedBy="parentid")
+	private List<Goals> children;
+	
+	
 	public int getId() {
 		return id;
 	}
@@ -86,10 +98,10 @@ public class Goals {
 		this.description = description;
 	}
 	
-	public int getParentid() {
+	public Integer getParentid() {
 		return parentid;
 	}
-	public void setParentid(int parentid) {
+	public void setParentid(Integer parentid) {
 		this.parentid = parentid;
 	}
 	
@@ -170,5 +182,17 @@ public class Goals {
 	}
 	public void setReplacement(String replacement) {
 		this.replacement = replacement;
+	}
+	public Boolean getIsDaily() {
+		return isDaily;
+	}
+	public void setIsDaily(Boolean isDaily) {
+		this.isDaily = isDaily;
+	}
+	public List<Goals> getChildren() {
+		return children;
+	}
+	public void setChildren(List<Goals> children) {
+		this.children = children;
 	}
 }

@@ -80,7 +80,11 @@ public class GoalsController {
 				case "waiting":
 					return this.goalRepository.findGoalsByPhase(state);
 				case "active":
-					return this.goalRepository.findGoalsByPhaseIsNullOrPhaseNotLike("waiting");
+					return this.goalRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
+				case "inbox":
+					return this.goalRepository.findGoalsByPhaseIsNull();
+				case "daily":
+					return this.goalRepository.findGoalsByIsDailyIsTrue();
 				default:
 					return this.goalRepository.findAll();			
 			}
@@ -149,11 +153,22 @@ public class GoalsController {
 		updatedGoal.setJustification(goals.getJustification());
 		updatedGoal.setIsCompleted(goals.getIsCompleted());
 		updatedGoal.setIsReoccuring(goals.getIsReoccuring());
+		if (goals.getPriority() != updatedGoal.getPriority()) {
+			Goals otherGoal = this.goalRepository.findGoalByPriority(goals.getPriority());
+			if (otherGoal != null) {
+				otherGoal.setPriority(updatedGoal.getPriority());
+				this.goalRepository.save(otherGoal);
+			}
+			updatedGoal.setPriority(goals.getPriority());
+		}
 		updatedGoal.setPriority(goals.getPriority());
 		updatedGoal.setIdealOutcome(goals.getIdealOutcome());
 		updatedGoal.setScope(goals.getScope());
 		updatedGoal.setBlockingReason(goals.getBlockingReason());
 		updatedGoal.setReplacement(goals.getReplacement());
+		if(goals.getIsDaily() != null) {
+			updatedGoal.setIsDaily(goals.getIsDaily());
+		}
 		
 		this.goalRepository.save(updatedGoal);
 		
