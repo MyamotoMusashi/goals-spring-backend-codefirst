@@ -1,4 +1,4 @@
-	package goals.controllers;
+package goals.controllers;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -50,10 +50,12 @@ public class GoalsController {
 	List<Goals> goals;
 	IdGenerator idGenerator;
 	
-	@Autowired
-	GoalsRepository goalRepository;
 	
-	public GoalsController() {
+	private GoalsRepository goalRepository;
+	
+	
+	public GoalsController(GoalsRepository goalRepository) {
+		this.goalRepository = goalRepository;
 //		this.goals = new ArrayList<Goals>();
 //		this.idGenerator = new IdGenerator();
 //		
