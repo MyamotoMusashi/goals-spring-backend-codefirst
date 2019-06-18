@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -13,68 +14,69 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
-@Entity
+@Entity(name="goal")
 @JsonIgnoreProperties 
-public class Goals {
+public class Goal {
 		
 	@Id
 	@GeneratedValue
-	@Column(name="id")
+	@Column(name="goal")
+
 	private int id;
 	
-	@Column(name="title")
+	@Column(name="goal_title")
 	private String title;
 	
-	@Column(name="description")
+	@Column(name="goal_description")
 	private String description;
 	
-	@Column(name="parentid")
+	@Column(name="goal_parentGoal")
 	private Integer parentid;
 	
-	@Column(name="dueDate")
+	@Column(name="goal_dueDate")
 	private String dueDate;
 	
-	@Column(name="estimatedWork")
+	@Column(name="goal_estimatedWork")
 	private int estimatedWork;
 	
-	@Column(name="remainingWork")
+	@Column(name="goal_remainingWork")
 	private int remainingWork;
 	
-	@Column(name="progress")
+	@Column(name="goal_progress")
 	private String progress;
 	
-	@Column(name="justification")
+	@Column(name="goal_justification")
 	private String justification;
 	
-	@Column(name="phase")
+	@Column(name="goal_phase")
 	private String phase;
 	
-	@Column(name="isCompleted")
+	@Column(name="goal_isCompleted")
 	private Boolean isCompleted;
 	
-	@Column(name="isReoccuring")
+	@Column(name="goal_isReoccuring")
 	private Boolean isReoccuring;
 	
-	@Column(name="priority")
+	@Column(name="goal_priority")
 	private int priority;
 	
-	@Column(name="idealOutcome")
+	@Column(name="goal_idealOutcome")
 	private String idealOutcome;
 	
-	@Column(name="scope")
+	@Column(name="goal_scope")
 	private String scope;
 	
-	@Column(name="blockingReason")
+	@Column(name="goal_blockingReason")
 	private String blockingReason;
 	
-	@Column(name="replacement")
+	@Column(name="goal_replacement")
 	private String replacement;
 	
-	@Column(name="isDaily")
+	@Column(name="goal_isDaily")
 	private Boolean isDaily;
 	
 	@OneToMany(mappedBy="parentid")
-	private List<Goals> children;
+	private List<Goal> children;
 	
 	
 	public int getId() {
@@ -189,10 +191,10 @@ public class Goals {
 	public void setIsDaily(Boolean isDaily) {
 		this.isDaily = isDaily;
 	}
-	public List<Goals> getChildren() {
+	public List<Goal> getChildren() {
 		return children;
 	}
-	public void setChildren(List<Goals> children) {
+	public void setChildren(List<Goal> children) {
 		this.children = children;
 	}
 }

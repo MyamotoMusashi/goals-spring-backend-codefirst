@@ -37,9 +37,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import goals.models.Goals;
+import goals.models.ActiveGoalsQueue;
+import goals.models.Goal;
 import goals.utils.IdGenerator;
-import goals.repositories.GoalsRepository;
+import goals.repositories.ActiveGoalsQueueRepository;
+//import goals.repositories.ActiveGoalsQueueRepository;
+import goals.repositories.GoalRepository;
 
 
 @RestController
@@ -47,15 +50,17 @@ import goals.repositories.GoalsRepository;
 @CrossOrigin(origins = "*")
 public class GoalsController {
 	
-	List<Goals> goals;
+	List<Goal> goals;
 	IdGenerator idGenerator;
 	
 	
-	private GoalsRepository goalRepository;
+	private GoalRepository goalsRepository;
+	private ActiveGoalsQueueRepository activeGoalsQueueRepository;
 	
-	
-	public GoalsController(GoalsRepository goalRepository) {
-		this.goalRepository = goalRepository;
+
+	public GoalsController(GoalRepository goalsRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository) {
+		this.goalsRepository = goalsRepository;
+		this.activeGoalsQueueRepository = activeGoalsQueueRepository;
 //		this.goals = new ArrayList<Goals>();
 //		this.idGenerator = new IdGenerator();
 //		
@@ -76,25 +81,30 @@ public class GoalsController {
 	
 	
 	@GetMapping("/goals")
-	public List<Goals> getAll(@RequestParam(value="state", required=false) String state){
+	public List<Goal> getAll(@RequestParam(value="state", required=false) String state){
 		if(state !=null) {
 			switch(state) {
 				case "waiting":
-					return this.goalRepository.findGoalsByPhase(state);
+					return this.goalsRepository.findGoalsByPhase(state);
 				case "active":
-					return this.goalRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
+					return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
 				case "inbox":
-					return this.goalRepository.findGoalsByPhaseIsNull();
+					return this.goalsRepository.findGoalsByPhaseIsNull();
 				case "daily":
-					return this.goalRepository.findGoalsByIsDailyIsTrue();
+					return this.goalsRepository.findGoalsByIsDailyIsTrue();
 				default:
-					return this.goalRepository.findAll();			
+					return this.goalsRepository.findAll();			
 			}
 		}
 		else {
-			return this.goalRepository.findAll();
+			return this.goalsRepository.findAll();
 		}
 
+	}
+	
+	@GetMapping("/goals/jojo")
+	public List<ActiveGoalsQueue> getAllActive(){
+		return this.activeGoalsQueueRepository.findAll();
 	}
 	
 	@GetMapping("/goals/download")
@@ -123,20 +133,21 @@ public class GoalsController {
 	}
 	
 	@PostMapping("/goals")
-	public List<Goals> AddGoal(@RequestBody Goals newGoal) {
-		this.goalRepository.save(newGoal);
+	public List<Goal> AddGoal(@RequestBody Goal newGoal) {
+		this.goalsRepository.save(newGoal);
 		
-		return this.goalRepository.findGoalsByParentid(0);
+		//return this.goalRepository.findGoalsByParentid(0);
+		return this.goalsRepository.findAll();
 	}
 	
 	@GetMapping("/goals/{id}")
-	public Optional<Goals> getGoalById(@PathVariable(value="id") int id){
-		return this.goalRepository.findById(id);
+	public Optional<Goal> getGoalById(@PathVariable(value="id") int id){
+		return this.goalsRepository.findById(id);
 	}
 		
 	@PutMapping("/goals/{id}")
-	public List<Goals> updateGoalById(@PathVariable(value="id") int id, @RequestBody Goals goals){
-		Goals updatedGoal =  this.goalRepository.findById(id).get();
+	public List<Goal> updateGoalById(@PathVariable(value="id") int id, @RequestBody Goal goals){
+		Goal updatedGoal =  this.goalsRepository.findById(id).get();
 		
 		if (goals.getTitle() != null){
 			updatedGoal.setTitle(goals.getTitle());
@@ -156,11 +167,11 @@ public class GoalsController {
 		updatedGoal.setIsCompleted(goals.getIsCompleted());
 		updatedGoal.setIsReoccuring(goals.getIsReoccuring());
 		if (goals.getPriority() != updatedGoal.getPriority()) {
-			Goals otherGoal = this.goalRepository.findGoalByPriority(goals.getPriority());
-			if (otherGoal != null) {
-				otherGoal.setPriority(updatedGoal.getPriority());
-				this.goalRepository.save(otherGoal);
-			}
+			//Goals otherGoal = this.goalRepository.findGoalByPriority(goals.getPriority());
+			//if (otherGoal != null) {
+				//otherGoal.setPriority(updatedGoal.getPriority());
+				//this.goalRepository.save(otherGoal);
+			//}
 			updatedGoal.setPriority(goals.getPriority());
 		}
 		updatedGoal.setPriority(goals.getPriority());
@@ -172,17 +183,17 @@ public class GoalsController {
 			updatedGoal.setIsDaily(goals.getIsDaily());
 		}
 		
-		this.goalRepository.save(updatedGoal);
+		this.goalsRepository.save(updatedGoal);
 		
-		return this.goalRepository.findAll();
+		return this.goalsRepository.findAll();
 	}
 	
 	@DeleteMapping("/goals/{id}")
-	public List<Goals> deleteGoalById(@PathVariable(value="id") int id){
+	public List<Goal> deleteGoalById(@PathVariable(value="id") int id){
 		
-		this.goalRepository.deleteById(id);
+		this.goalsRepository.deleteById(id);
 		
-		return this.goalRepository.findAll();
+		return this.goalsRepository.findAll();
 	}
 	
 //	@RequestMapping(value="/gosho", method=RequestMethod.GET)
