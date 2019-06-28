@@ -1,194 +1,205 @@
 package goals.models;
 
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+
+import javax.persistence.JoinColumn;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+@MappedSuperclass
+public class BaseGoalsQueue {
 
-
-@Entity(name="goal")
-@JsonIgnoreProperties 
-public class Goal {
-		
-	@Id
-	@GeneratedValue
-	@Column(name="goal")
+	@OneToOne()
+	@JoinColumn(name="goal")
+	private Goal goal;
+	
+	public Goal getGoal() {
+		return goal;
+	}
+	public void setGoal(Goal goal) {
+		this.goal = goal;
+	}
+	
+	@Transient
 	private int id;
 	
-	@Column(name="goal_title")
+	@Transient
 	private String title;
 	
-	@Column(name="goal_description")
+	@Transient
 	private String description;
-	
-	@Column(name="goal_parentGoal")
+
+	@Transient
 	private Integer parentid;
-	
-	@Column(name="goal_dueDate")
+
+	@Transient
 	private String dueDate;
-	
-	@Column(name="goal_estimatedWork")
+
+	@Transient
 	private int estimatedWork;
-	
-	@Column(name="goal_remainingWork")
+
+	@Transient
 	private int remainingWork;
 	
-	@Column(name="goal_progress")
+	@Transient
 	private String progress;
 	
-	@Column(name="goal_justification")
+	@Transient
 	private String justification;
 	
-	@Column(name="goal_phase")
+	@Transient
 	private String phase;
 	
-	@Column(name="goal_isCompleted")
+	@Transient
 	private Boolean isCompleted;
 	
-	@Column(name="goal_isReoccuring")
+	@Transient
 	private Boolean isReoccuring;
-	
-	// TODO delete goal_priority columns from SQL
-	
-	@Column(name="goal_idealOutcome")
+		
+	@Transient
 	private String idealOutcome;
 	
-	@Column(name="goal_scope")
+	@Transient
 	private String scope;
 	
-	@Column(name="goal_blockingReason")
+	@Transient
 	private String blockingReason;
 	
-	@Column(name="goal_replacement")
+	@Transient
 	private String replacement;
 	
-	@Column(name="goal_isDaily")
+	@Transient
 	private Boolean isDaily;
 	
-	@OneToMany(mappedBy="parentid")
+	@Transient
 	private List<Goal> children;
 	
-	
 	public int getId() {
-		return id;
+		return this.goal.getId();
 	}
+	
 	public void setId(int id) {
-		this.id = id;
+		this.goal.setId(id);
 	}
 	
 	public String getTitle() {
-		return title;
+		return this.goal.getTitle();
 	}
 	public void setTitle(String title) {
-		this.title = title;
+		this.goal.setTitle(title);
 	}
-	
+
 	public String getDescription() {
-		return description;
+		return this.goal.getDescription();
 	}
 	public void setDescription(String description) {
-		this.description = description;
+		this.goal.setDescription(description);
 	}
 	
 	public Integer getParentid() {
-		return parentid;
+		return this.goal.getParentid();
 	}
 	public void setParentid(Integer parentid) {
-		this.parentid = parentid;
+		this.goal.setParentid(parentid);
 	}
 	
 	public String getDueDate() {
-		return dueDate;
+		return this.goal.getDueDate();
 	}
 	public void setDueDate(String dueDate) {
-		this.dueDate = dueDate;
+		this.goal.setDueDate(dueDate);
 	}
+	
 	public int getEstimatedWork() {
-		return estimatedWork;
+		return this.goal.getEstimatedWork();
 	}
 	public void setEstimatedWork(int estimatedWork) {
-		this.estimatedWork = estimatedWork;
+		this.goal.setEstimatedWork(estimatedWork);
 	}
+	
 	public int getRemainingWork() {
-		return remainingWork;
+		return this.goal.getRemainingWork();
 	}
 	public void setRemainingWork(int remainingWork) {
-		this.remainingWork = remainingWork;
+		this.goal.setRemainingWork(remainingWork);
 	}
+	
 	public String getProgress() {
-		return progress;
+		return this.goal.getProgress();
 	}
 	public void setProgress(String progress) {
-		this.progress = progress;
+		this.goal.setProgress(progress);
 	}
+	
 	public String getJustification() {
-		return justification;
+		return this.goal.getJustification();
 	}
 	public void setJustification(String justification) {
-		this.justification = justification;
+		this.goal.setJustification(justification);
 	}
+	
 	public String getPhase() {
-		return phase;
+		return this.goal.getPhase();
 	}
 	public void setPhase(String phase) {
-		this.phase = phase;
+		this.goal.setPhase(phase);
 	}
+	
 	public Boolean getIsCompleted() {
-		return isCompleted;
+		return this.goal.getIsCompleted();
 	}
 	public void setIsCompleted(Boolean isCompleted) {
-		this.isCompleted = isCompleted;
+		this.goal.getIsCompleted();
 	}
+	
 	public Boolean getIsReoccuring() {
-		return isReoccuring;
+		return this.goal.getIsReoccuring();
 	}
 	public void setIsReoccuring(Boolean isReoccuring) {
-		this.isReoccuring = isReoccuring;
+		this.goal.setIsReoccuring(isReoccuring);
 	}
-
+		
 	public String getIdealOutcome() {
-		return idealOutcome;
+		return this.goal.getIdealOutcome();
 	}
 	public void setIdealOutcome(String idealOutcome) {
-		this.idealOutcome = idealOutcome;
+		this.goal.setIdealOutcome(idealOutcome);
 	}
+	
 	public String getScope() {
-		return scope;
+		return this.goal.getScope();
 	}
 	public void setScope(String scope) {
-		this.scope = scope;
+		this.goal.setScope(scope);
 	}
+	
 	public String getBlockingReason() {
-		return blockingReason;
+		return this.goal.getBlockingReason();
 	}
 	public void setBlockingReason(String blockingReason) {
-		this.blockingReason = blockingReason;
+		this.goal.setBlockingReason(blockingReason);
 	}
+	
 	public String getReplacement() {
-		return replacement;
+		return this.goal.getReplacement();
 	}
 	public void setReplacement(String replacement) {
-		this.replacement = replacement;
+		this.goal.setReplacement(replacement);
 	}
+	
 	public Boolean getIsDaily() {
-		return isDaily;
+		return goal.getIsDaily();
 	}
+	
 	public void setIsDaily(Boolean isDaily) {
-		this.isDaily = isDaily;
+		this.goal.setIsDaily(isDaily);
 	}
 	public List<Goal> getChildren() {
-		return children;
+		return this.goal.getChildren();
 	}
 	public void setChildren(List<Goal> children) {
-		this.children = children;
+		this.goal.setChildren(children);
 	}
 }

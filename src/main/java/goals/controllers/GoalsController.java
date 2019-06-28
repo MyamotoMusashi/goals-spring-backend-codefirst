@@ -37,12 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import goals.models.ActiveGoalsQueue;
+import goals.interfaces.GoalsQueue;
+import goals.models.BaseGoalsQueue;
 import goals.models.Goal;
+import goals.models.InboxGoalsQueue;
 import goals.utils.IdGenerator;
 import goals.repositories.ActiveGoalsQueueRepository;
+import goals.repositories.BacklogGoalsQueueRepository;
 //import goals.repositories.ActiveGoalsQueueRepository;
 import goals.repositories.GoalRepository;
+import goals.repositories.InboxGoalsQueueRepository;
 
 
 @RestController
@@ -56,11 +60,15 @@ public class GoalsController {
 	
 	private GoalRepository goalsRepository;
 	private ActiveGoalsQueueRepository activeGoalsQueueRepository;
+	private BacklogGoalsQueueRepository backlogGoalsQueueRepository;
+	private InboxGoalsQueueRepository inboxGoalsQueueRepository;
 	
 
-	public GoalsController(GoalRepository goalsRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository) {
+	public GoalsController(GoalRepository goalsRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository, BacklogGoalsQueueRepository backlogGoalsQueueRepository, InboxGoalsQueueRepository inboxGoalsQueueRepository) {
 		this.goalsRepository = goalsRepository;
 		this.activeGoalsQueueRepository = activeGoalsQueueRepository;
+		this.backlogGoalsQueueRepository = backlogGoalsQueueRepository;
+		this.inboxGoalsQueueRepository = inboxGoalsQueueRepository;
 //		this.goals = new ArrayList<Goals>();
 //		this.idGenerator = new IdGenerator();
 //		
@@ -85,26 +93,32 @@ public class GoalsController {
 		if(state !=null) {
 			switch(state) {
 				case "waiting":
-					return this.goalsRepository.findGoalsByPhase(state);
+					return this.goalsRepository.findGoalsByPhaseAndParentidIsNull(state);
+					//System.out.println(this.backlogGoalsQueueRepository.findBacklogQuery());
+					//return this.backlogGoalsQueueRepository.findBacklogQuery();
 				case "active":
-					return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
+					return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLikeAndParentidIsNull("waiting");
+					//return this.activeGoalsQueueRepository.findActiveQuery();
 				case "inbox":
-					return this.goalsRepository.findGoalsByPhaseIsNull();
+					return this.goalsRepository.findGoalsByPhaseIsNullAndParentidIsNull();
+					//return this.inboxGoalsQueueRepository.findInboxQuery();
 				case "daily":
 					return this.goalsRepository.findGoalsByIsDailyIsTrue();
 				default:
-					return this.goalsRepository.findAll();			
+					return this.goalsRepository.findAll();
+					//return this.activeGoalsQueueRepository.findActiveQuery();
 			}
 		}
 		else {
 			return this.goalsRepository.findAll();
+			//return this.activeGoalsQueueRepository.findAll();
 		}
 
 	}
 	
 	@GetMapping("/goals/jojo")
-	public List<ActiveGoalsQueue> getAllActive(){
-		return this.activeGoalsQueueRepository.findAll();
+	public List<GoalsQueue> getAllActive(){
+		return this.activeGoalsQueueRepository.findQuery();
 	}
 	
 	@GetMapping("/goals/download")
@@ -135,11 +149,43 @@ public class GoalsController {
 	@PostMapping("/goals")
 	public List<Goal> AddGoal(@RequestBody Goal newGoal) {
 		this.goalsRepository.save(newGoal);
+		InboxGoalsQueue inboxGoalsQueue = new InboxGoalsQueue();
+		inboxGoalsQueue.setGoal(newGoal);
+		this.inboxGoalsQueueRepository.save(inboxGoalsQueue);
 		
 		//return this.goalRepository.findGoalsByParentid(0);
 		return this.goalsRepository.findAll();
 	}
 	
+	@PutMapping("/goals")
+	public List<Goal> ChangePriority(@RequestBody Goal newGoal){
+		Goal[] goalListToBeUpdated;
+		if(newGoal.getPhase() != null) {
+			switch(newGoal.getPhase()) {
+			case "waiting":
+				goalListToBeUpdated = (Goal[]) this.goalsRepository.findGoalsByPhaseAndParentidIsNull(newGoal.getPhase()).toArray();
+				//System.out.println(this.backlogGoalsQueueRepository.findBacklogQuery());
+				//return this.backlogGoalsQueueRepository.findBacklogQuery();
+			case "active":
+				return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLikeAndParentidIsNull("waiting");
+				//return this.activeGoalsQueueRepository.findActiveQuery();
+			case "inbox":
+				return this.goalsRepository.findGoalsByPhaseIsNullAndParentidIsNull();
+				//return this.inboxGoalsQueueRepository.findInboxQuery();
+			case "daily":
+				return this.goalsRepository.findGoalsByIsDailyIsTrue();
+			default:
+				return this.goalsRepository.findAll();
+				//return this.activeGoalsQueueRepository.findActiveQuery();
+			}
+		}
+		else {
+			goalListToBeUpdated = (Goal[]) this.goalsRepository.findGoalsByPhaseIsNullAndParentidIsNull().toArray();
+			System.out.println(goalListToBeUpdated[10]);
+			System.out.println(newGoal);
+			return this.goalsRepository.findGoalsByPhaseIsNullAndParentidIsNull();
+		}	
+	}
 	@GetMapping("/goals/{id}")
 	public Optional<Goal> getGoalById(@PathVariable(value="id") int id){
 		return this.goalsRepository.findById(id);
@@ -156,7 +202,6 @@ public class GoalsController {
 		if (goals.getDescription() != null){
 			updatedGoal.setDescription(goals.getDescription());
 		}
-		
 		updatedGoal.setParentid(goals.getParentid());
 		updatedGoal.setDueDate(goals.getDueDate());
 		updatedGoal.setPhase(goals.getPhase());
@@ -166,15 +211,15 @@ public class GoalsController {
 		updatedGoal.setJustification(goals.getJustification());
 		updatedGoal.setIsCompleted(goals.getIsCompleted());
 		updatedGoal.setIsReoccuring(goals.getIsReoccuring());
-		if (goals.getPriority() != updatedGoal.getPriority()) {
-			//Goals otherGoal = this.goalRepository.findGoalByPriority(goals.getPriority());
-			//if (otherGoal != null) {
-				//otherGoal.setPriority(updatedGoal.getPriority());
-				//this.goalRepository.save(otherGoal);
-			//}
-			updatedGoal.setPriority(goals.getPriority());
-		}
-		updatedGoal.setPriority(goals.getPriority());
+//		if (goals.getPriority() != updatedGoal.getPriority()) {
+//			Goals otherGoal = this.goalRepository.findGoalByPriority(goals.getPriority());
+//			if (otherGoal != null) {
+//				otherGoal.setPriority(updatedGoal.getPriority());
+//				this.goalRepository.save(otherGoal);
+//			}
+//			updatedGoal.setPriority(goals.getPriority());
+//		}
+		//updatedGoal.setPriority(goals.getPriority());
 		updatedGoal.setIdealOutcome(goals.getIdealOutcome());
 		updatedGoal.setScope(goals.getScope());
 		updatedGoal.setBlockingReason(goals.getBlockingReason());

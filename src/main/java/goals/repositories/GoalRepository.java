@@ -21,15 +21,14 @@ public interface GoalRepository extends JpaRepository<Goal, Integer>{
 	
 	public List<Goal> findGoalsByParentid(int parentid);
 	
-	public List<Goal> findGoalsByPhase(String phase);
+	public List<Goal> findGoalsByPhaseAndParentidIsNull(String phase);
 	
-	public List<Goal> findGoalsByPhaseIsNull();
+	public List<Goal> findGoalsByPhaseIsNullAndParentidIsNull();
 	
-	public List<Goal> findGoalsByPhaseIsNotNullAndPhaseNotLike(String phase);
+	public List<Goal> findGoalsByPhaseIsNotNullAndPhaseNotLikeAndParentidIsNull(String phase);
 	
 	public List<Goal> findGoalsByIsDailyIsTrue();
 	
-	public Goal findGoalByPriority(int priority);
-	
+	//public Goal findGoalByPriority(int priority);
 	
 }
