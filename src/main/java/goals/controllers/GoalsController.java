@@ -1,12 +1,7 @@
 package goals.controllers;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.Principal;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,14 +11,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import goals.models.ActiveGoalsQueue;
 import goals.models.Goal;
-import goals.utils.IdGenerator;
 import goals.repositories.ActiveGoalsQueueRepository;
-//import goals.repositories.ActiveGoalsQueueRepository;
 import goals.repositories.GoalRepository;
 
 
@@ -51,32 +34,11 @@ import goals.repositories.GoalRepository;
 public class GoalsController {
 	
 	List<Goal> goals;
-	IdGenerator idGenerator;
-	
 	
 	private GoalRepository goalsRepository;
-	private ActiveGoalsQueueRepository activeGoalsQueueRepository;
 	
-
-	public GoalsController(GoalRepository goalsRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository) {
+	public GoalsController(GoalRepository goalsRepository) {
 		this.goalsRepository = goalsRepository;
-		this.activeGoalsQueueRepository = activeGoalsQueueRepository;
-//		this.goals = new ArrayList<Goals>();
-//		this.idGenerator = new IdGenerator();
-//		
-//		int count = 10;
-//		
-//		for (int i = 0; i < 10; i++) {
-//			
-//			Goal goal = new Goal();
-//			
-//			goal.setId(this.idGenerator.getNextId());
-//			goal.setTitle("Goal#" + i+1);
-//			goal.setDescription("Description for goal #" + i+1);
-//			
-//			goals.add(goal);
-//			
-//		}
 	}
 	
 	
@@ -89,7 +51,7 @@ public class GoalsController {
 				case "active":
 					return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
 				case "inbox":
-					return this.goalsRepository.findGoalsByPhaseIsNull();
+					return this.goalsRepository.findGoalsByParentIdIsNull();
 				case "daily":
 					return this.goalsRepository.findGoalsByIsDailyIsTrue();
 				default:
@@ -101,12 +63,7 @@ public class GoalsController {
 		}
 
 	}
-	
-	@GetMapping("/goals/jojo")
-	public List<ActiveGoalsQueue> getAllActive(){
-		return this.activeGoalsQueueRepository.findAll();
-	}
-	
+		
 	@GetMapping("/goals/download")
 	public void getDownload(HttpServletResponse response) throws IOException {
 	    
@@ -129,6 +86,7 @@ public class GoalsController {
 	 
 	    FileOutputStream fileOut = new FileOutputStream("poi-generated-file.xlsx");
         workbook.write(fileOut);
+        workbook.close();
         fileOut.close();
 	}
 	
@@ -157,7 +115,7 @@ public class GoalsController {
 			updatedGoal.setDescription(goals.getDescription());
 		}
 		
-		updatedGoal.setParentid(goals.getParentid());
+		updatedGoal.setParentId(goals.getParentId());
 		updatedGoal.setDueDate(goals.getDueDate());
 		updatedGoal.setPhase(goals.getPhase());
 		updatedGoal.setEstimatedWork(goals.getEstimatedWork());
@@ -194,55 +152,5 @@ public class GoalsController {
 		this.goalsRepository.deleteById(id);
 		
 		return this.goalsRepository.findAll();
-	}
-	
-//	@RequestMapping(value="/gosho", method=RequestMethod.GET)
-//	public ResponseEntity<String> gosho(Principal principal) {
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		
-//		OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) authentication.getDetails();
-//		
-//		 
-//		String accessToken = auth.getTokenValue();
-//		RestTemplate restTemplate = new RestTemplate();
-//		ResponseEntity<String> response;
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_JSON);
-//		String query = "Bearer " + accessToken;
-//		headers.set("Authorization",query);
-//		
-//		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-//		response = restTemplate.exchange("https://www.googleapis.com/calendar/v3/calendars/knifed313@gmail.com/events",HttpMethod.GET,entity, String.class);
-//		return response;
-//	}
-//	
-//	@RequestMapping(value="/addEvent", method=RequestMethod.GET)
-//	public ResponseEntity<String> addEventToGoogleCalendar() {
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) authentication.getDetails();
-//		String accessToken = auth.getTokenValue();
-//		
-//		RestTemplate restTemplate = new RestTemplate();
-//		ResponseEntity<String> response;
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_JSON);
-//		String query = "Bearer " + accessToken;
-//		headers.set("Authorization",query);
-//		
-//		Event event = new Event();
-//		event.setSummary("Finally! My First Event");
-//		
-//		String start = "2019-03-04";
-//		event.setStart(start);
-//		
-//		String end = "2019-03-04";
-//		event.setEnd(end);
-//		
-//		HttpEntity<Event> entity = new HttpEntity<Event>(event, headers);
-//		
-//		response = restTemplate.exchange("https://www.googleapis.com/calendar/v3/calendars/knifed313@gmail.com/events",HttpMethod.POST,entity, String.class);
-//		
-//		return response;
-//	}
-	
+	}	
 }

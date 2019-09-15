@@ -6,11 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
@@ -31,7 +26,7 @@ public class Goal {
 	private String description;
 	
 	@Column(name="goal_parentGoal")
-	private Integer parentid;
+	private Integer parentId;
 	
 	@Column(name="goal_dueDate")
 	private String dueDate;
@@ -75,7 +70,7 @@ public class Goal {
 	@Column(name="goal_isDaily")
 	private Boolean isDaily;
 	
-	@OneToMany(mappedBy="parentid")
+	@OneToMany(mappedBy="parentId")
 	private List<Goal> children;
 	
 	
@@ -100,11 +95,11 @@ public class Goal {
 		this.description = description;
 	}
 	
-	public Integer getParentid() {
-		return parentid;
+	public Integer getParentId() {
+		return parentId;
 	}
-	public void setParentid(Integer parentid) {
-		this.parentid = parentid;
+	public void setParentId(Integer parentid) {
+		this.parentId = parentid;
 	}
 	
 	public String getDueDate() {
